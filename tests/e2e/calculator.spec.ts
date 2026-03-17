@@ -207,3 +207,27 @@ test("mobile calculator layout stays readable without horizontal overflow", asyn
   await assertNoInvalidNumbers(page);
   await assertNoHorizontalOverflow(page, 6);
 });
+
+test("mobile navigation exposes the full route set", async ({ page, isMobile }) => {
+  test.skip(!isMobile, "This assertion is only relevant to the mobile project.");
+
+  await page.goto("/");
+
+  const menuButton = page.getByRole("button", { name: /open navigation menu/i });
+  await expect(menuButton).toBeVisible();
+  await menuButton.click();
+
+  const mobileNav = page.getByRole("navigation", { name: "Mobile" });
+
+  await expect(mobileNav.getByRole("link", { name: "Framework", exact: true })).toBeVisible();
+  await expect(mobileNav.getByRole("link", { name: "Explore", exact: true })).toBeVisible();
+  await expect(mobileNav.getByRole("link", { name: "Calculator", exact: true })).toBeVisible();
+  await expect(mobileNav.getByRole("link", { name: "Model Assumptions", exact: true })).toBeVisible();
+
+  await mobileNav.getByRole("link", { name: "Calculator", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: /model one deployment scenario against today’s baseline\./i })
+  ).toBeVisible();
+
+  await assertNoHorizontalOverflow(page, 6);
+});
