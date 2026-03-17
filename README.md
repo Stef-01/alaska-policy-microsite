@@ -1,5 +1,7 @@
 # Alaska Rural Health Policy Microsite
 
+[![CI](https://github.com/Stef-01/alaska-policy-microsite/actions/workflows/ci.yml/badge.svg)](https://github.com/Stef-01/alaska-policy-microsite/actions/workflows/ci.yml)
+
 Custom Next.js microsite for an Alaska pilot of a rural diabetes eye-care policy framework. The app combines:
 
 - A public-facing policy microsite with framework, explorer, methods, governance, and regional playbooks.
@@ -87,3 +89,4 @@ It combines:
 
 - Review the seeded synthetic bridge assumptions before using public outputs externally.
 - The SQLite database is local-only for v1. Move Prisma to a managed database before multi-user deployment.
+- GitHub is now the public source repository and CI entrypoint. A server-capable host is still required for the editable assumptions workspace and API-backed admin flows.
