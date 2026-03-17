@@ -248,6 +248,25 @@ for (const region of regions) {
                   errors.push(`${region.slug} follow-up patients fell after intervention`);
                 }
 
+                const screenedDelta =
+                  result.interventionSnapshot.screenedPatients -
+                  result.baselineSnapshot.screenedPatients;
+                const missedDelta =
+                  result.baselineSnapshot.missedPatients -
+                  result.interventionSnapshot.missedPatients;
+
+                if (Math.abs(screenedDelta - result.additionalScreenings.base) > 1) {
+                  errors.push(
+                    `${region.slug} additional screenings do not reconcile with screened-patient delta`
+                  );
+                }
+
+                if (Math.abs(missedDelta - result.additionalScreenings.base) > 1) {
+                  errors.push(
+                    `${region.slug} additional screenings do not reconcile with missed-patient delta`
+                  );
+                }
+
                 if (
                   result.severeConsequencesAvoided.base >
                   result.baselineSevereConsequences.base + 1e-9
@@ -260,6 +279,16 @@ for (const region of regions) {
                   result.severeConsequencesAvoided.base + 1e-9
                 ) {
                   errors.push(`${region.slug} blindness avoided exceeded severe consequences`);
+                }
+
+                const blindnessDelta =
+                  result.baselineBlindnessConsequences.base -
+                  result.interventionBlindnessConsequences.base;
+
+                if (Math.abs(blindnessDelta - result.blindnessAvoided.base) > 1e-6) {
+                  errors.push(
+                    `${region.slug} blindness avoided does not reconcile with the blindness-risk delta`
+                  );
                 }
 
                 if (

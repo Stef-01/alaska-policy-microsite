@@ -21,7 +21,7 @@ const toneClasses: Record<
   }
 > = {
   paper: {
-    shell: "border-[color:var(--line)] bg-white/92 shadow-[0_10px_28px_rgba(11,33,50,0.04)]",
+    shell: "shadow-soft border-[color:var(--line)] bg-[color:var(--surface)]",
     hover: "border-[color:var(--line)] bg-white/95 text-[color:var(--foreground)]",
     expanded: "border-[color:var(--line)] bg-white/92 text-[color:var(--foreground)]",
     label: "text-[color:var(--muted)]",
@@ -31,7 +31,7 @@ const toneClasses: Record<
   },
   teal: {
     shell:
-      "border-[color:rgba(15,124,134,0.14)] bg-[linear-gradient(180deg,rgba(15,124,134,0.05),rgba(255,255,255,0.94))] shadow-[0_10px_28px_rgba(11,33,50,0.04)]",
+      "shadow-soft border-[color:rgba(15,124,134,0.14)] bg-[linear-gradient(180deg,rgba(15,124,134,0.05),rgba(255,255,255,0.94))]",
     hover: "border-[color:rgba(15,124,134,0.18)] bg-white/94 text-[color:var(--foreground)]",
     expanded:
       "border-[color:rgba(15,124,134,0.18)] bg-white/92 text-[color:var(--foreground)]",
@@ -42,7 +42,7 @@ const toneClasses: Record<
   },
   warm: {
     shell:
-      "border-[color:rgba(196,97,42,0.14)] bg-[linear-gradient(180deg,rgba(196,97,42,0.05),rgba(255,255,255,0.94))] shadow-[0_10px_28px_rgba(11,33,50,0.04)]",
+      "shadow-soft border-[color:rgba(196,97,42,0.14)] bg-[linear-gradient(180deg,rgba(196,97,42,0.05),rgba(255,255,255,0.94))]",
     hover: "border-[color:rgba(196,97,42,0.18)] bg-white/94 text-[color:var(--foreground)]",
     expanded:
       "border-[color:rgba(196,97,42,0.18)] bg-white/92 text-[color:var(--foreground)]",
@@ -113,7 +113,11 @@ export function DetailCard({
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <article className={cn("group relative rounded-[1.7rem] border p-5", toneClasses[tone].shell)}>
+    <motion.article
+      className={cn("group relative rounded-[1.8rem] border p-5 md:p-6", toneClasses[tone].shell)}
+      whileHover={{ y: -4 }}
+      transition={{ type: "spring", stiffness: 260, damping: 24 }}
+    >
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           {eyebrow ? (
@@ -121,7 +125,7 @@ export function DetailCard({
               {eyebrow}
             </p>
           ) : null}
-          <h2 className={cn("mt-2 font-display text-[1.85rem] leading-[1.04]", toneClasses[tone].text)}>
+          <h2 className={cn("mt-2 font-display text-[1.7rem] leading-[1.04] md:text-[1.8rem]", toneClasses[tone].text)}>
             {title}
           </h2>
         </div>
@@ -135,7 +139,7 @@ export function DetailCard({
 
       <div
         className={cn(
-          "pointer-events-none mt-5 hidden rounded-[1rem] border p-3 text-xs leading-5 opacity-0 transition duration-200 md:block md:translate-y-2 md:group-hover:translate-y-0 md:group-hover:opacity-100",
+          "pointer-events-none mt-5 hidden rounded-[1rem] border p-3 text-xs leading-5 opacity-0 transition duration-200 md:block md:translate-y-1.5 md:group-hover:translate-y-0 md:group-hover:opacity-100",
           toneClasses[tone].hover
         )}
       >
@@ -155,7 +159,7 @@ export function DetailCard({
           </motion.div>
         ) : null}
       </AnimatePresence>
-    </article>
+    </motion.article>
   );
 }
 
@@ -179,7 +183,11 @@ export function DisclosureRow({
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <div className={cn("group rounded-[1.35rem] border p-4", toneClasses[tone].shell)}>
+    <motion.div
+      className={cn("group rounded-[1.45rem] border p-4 md:p-5", toneClasses[tone].shell)}
+      whileHover={{ y: -3 }}
+      transition={{ type: "spring", stiffness: 260, damping: 24 }}
+    >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           {eyebrow ? (
@@ -222,7 +230,7 @@ export function DisclosureRow({
 
       <div
         className={cn(
-          "pointer-events-none mt-4 hidden rounded-[1rem] border p-3 text-xs leading-5 opacity-0 transition duration-200 md:block md:translate-y-2 md:group-hover:translate-y-0 md:group-hover:opacity-100",
+          "pointer-events-none mt-4 hidden rounded-[1rem] border p-3 text-xs leading-5 opacity-0 transition duration-200 md:block md:translate-y-1.5 md:group-hover:translate-y-0 md:group-hover:opacity-100",
           toneClasses[tone].hover
         )}
       >
@@ -242,6 +250,6 @@ export function DisclosureRow({
           </motion.div>
         ) : null}
       </AnimatePresence>
-    </div>
+    </motion.div>
   );
 }

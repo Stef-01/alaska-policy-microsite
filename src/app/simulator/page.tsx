@@ -10,7 +10,7 @@ export default async function SimulatorPage() {
       <PageHero
         eyebrow="Calculator"
         title="Model one deployment scenario against today’s baseline."
-        lede="Adjust the inputs and read the health and cost effects beside you."
+        lede="Adjust the scenario and read the health and cost effects beside you."
         compact
       />
       <SimulatorClient

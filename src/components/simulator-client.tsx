@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
   Activity,
   ArrowLeftRight,
@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useState } from "react";
+import type { ReactNode } from "react";
 
 import { buildComparisonScenarios, simulateScenario } from "@/lib/simulation";
 import {
@@ -71,6 +72,7 @@ type ActiveTab = "health" | "economic";
 type ValueFormat = "count" | "currency" | "percent" | "decimal";
 type Tone = "teal" | "navy" | "warm" | "gold";
 const DISPLAY_HORIZON_YEARS = 3;
+const easeOutExpo = [0.22, 1, 0.36, 1] as const;
 
 const toneClasses: Record<
   Tone,
@@ -115,6 +117,7 @@ export function SimulatorClient({
   activeAssumptionSet: AssumptionSet;
   sourceNotes: SourceNote[];
 }) {
+  const reducedMotion = useReducedMotion();
   const [scenario, setScenario] = useState<InterventionScenario>({
     regionSlug: regions[0]?.slug ?? "anchorage",
     clinicInstalls: 3,
@@ -180,18 +183,26 @@ export function SimulatorClient({
       "broader_economic_value_dme",
     ].includes(note.id)
   );
+  const cardEnter = reducedMotion
+    ? {}
+    : {
+        initial: { opacity: 0, y: 14 },
+        whileInView: { opacity: 1, y: 0 },
+        viewport: { once: true, margin: "-40px" },
+        transition: { duration: 0.45, ease: easeOutExpo },
+      };
 
   return (
-    <div className="grid gap-6 md:grid-cols-[26.5rem_minmax(0,1fr)] md:items-start xl:grid-cols-[28rem_minmax(0,1fr)]">
+    <div className="grid gap-6 md:grid-cols-[26.75rem_minmax(0,1fr)] md:items-start lg:grid-cols-[29.5rem_minmax(0,1fr)] xl:grid-cols-[30rem_minmax(0,1fr)]">
       <section
         data-testid="calculator-sidebar"
-        className="relative z-10 rounded-[2.1rem] border border-[color:rgba(16,34,53,0.14)] bg-[color:#f7f3eb] p-8 shadow-[0_24px_80px_rgba(11,33,50,0.08)] md:sticky md:top-24 md:flex md:max-h-[calc(100vh-7rem)] md:flex-col md:self-start md:isolate md:overflow-hidden"
+        className="shadow-lift relative z-10 rounded-[2.25rem] border border-[color:rgba(16,34,53,0.12)] bg-[linear-gradient(180deg,rgba(248,244,236,0.98),rgba(244,240,232,0.94))] p-7 md:sticky md:top-24 md:flex md:max-h-[calc(100vh-7rem)] md:flex-col md:self-start md:isolate md:overflow-hidden"
       >
         <div className="shrink-0">
           <p className="text-[0.72rem] uppercase tracking-[0.32em] text-[color:var(--muted)]">
             Scenario inputs
           </p>
-          <h2 className="mt-2 max-w-[14rem] font-display text-[2.75rem] leading-[0.95] text-[color:var(--foreground)]">
+          <h2 className="mt-2 max-w-[16rem] font-display text-[2.45rem] leading-[0.95] text-[color:var(--foreground)] md:text-[2.7rem]">
             Build a regional deployment
           </h2>
         </div>
@@ -205,13 +216,13 @@ export function SimulatorClient({
                 block: "start",
               })
             }
-            className="rounded-full bg-[color:var(--foreground)] px-4 py-3 text-[0.92rem] font-medium text-white transition-colors hover:bg-[color:#1b3551]"
+            className="rounded-full bg-[color:var(--foreground)] px-4 py-3 text-[0.9rem] font-medium text-white transition-colors hover:bg-[color:#1b3551]"
           >
             Jump to outcomes
           </button>
           <Link
             href="/assumptions"
-            className="rounded-full border border-[color:var(--line)] bg-white px-4 py-3 text-center text-[0.92rem] font-medium text-[color:var(--foreground)] transition-colors hover:bg-[color:#f6f1e6]"
+            className="rounded-full border border-[color:var(--line)] bg-[color:var(--surface-strong)] px-4 py-3 text-center text-[0.9rem] font-medium text-[color:var(--foreground)] transition-colors hover:bg-white"
           >
             Fine-tune assumptions
           </Link>
@@ -219,11 +230,12 @@ export function SimulatorClient({
 
         <div
           data-testid="calculator-sidebar-scroll"
-          className="quiet-scrollbar relative mt-7 space-y-5 md:min-h-0 md:flex-1 md:overflow-y-auto md:pr-4 md:[scrollbar-gutter:stable]"
+          className="quiet-scrollbar relative mt-7 space-y-6 md:min-h-0 md:flex-1 md:overflow-y-auto md:pr-4 md:[scrollbar-gutter:stable]"
         >
-          <div className="pointer-events-none absolute inset-x-0 top-0 z-10 hidden h-7 bg-[linear-gradient(180deg,#f7f3eb,rgba(247,243,235,0))] md:block" />
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 hidden h-12 bg-[linear-gradient(0deg,#f7f3eb,rgba(247,243,235,0))] md:block" />
+          <div className="pointer-events-none absolute inset-x-0 top-0 z-10 hidden h-8 bg-[linear-gradient(180deg,#f7f3eb,rgba(247,243,235,0))] md:block" />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 hidden h-14 bg-[linear-gradient(0deg,#f7f3eb,rgba(247,243,235,0))] md:block" />
 
+          <SidebarSectionHeading>Deployment design</SidebarSectionHeading>
           <label className="block space-y-2 text-[0.92rem]">
             <span className="font-medium text-[color:var(--foreground)]">Region</span>
             <select
@@ -268,6 +280,7 @@ export function SimulatorClient({
             />
           </label>
 
+          <SidebarSectionHeading>Operating assumptions</SidebarSectionHeading>
           <div className="grid gap-4 xl:grid-cols-2">
             <label className="block space-y-2 text-[0.92rem]">
               <span className="font-medium text-[color:var(--foreground)]">Device mode</span>
@@ -394,7 +407,7 @@ export function SimulatorClient({
             </label>
           </div>
 
-          <div className="rounded-[1.6rem] border border-[color:var(--line)] bg-[color:rgba(15,124,134,0.08)] p-5 text-[0.88rem] leading-6 text-[color:var(--foreground)]">
+          <div className="rounded-[1.65rem] border border-[color:var(--line)] bg-[linear-gradient(180deg,rgba(15,124,134,0.08),rgba(255,255,255,0.58))] p-5 text-[0.86rem] leading-6 text-[color:var(--foreground)]">
             <p className="font-medium">Current baseline for {region.name}</p>
             <div className="mt-3 grid gap-3 sm:grid-cols-2">
               <BaselineMiniStat
@@ -419,27 +432,39 @@ export function SimulatorClient({
       </section>
 
       <div className="min-w-0 space-y-6">
-        <section
+        <motion.section
           id="calculator-results"
           data-testid="calculator-results"
-          className="surface-card relative overflow-hidden rounded-[2.2rem] p-6 md:p-8"
+          className="surface-card relative overflow-hidden rounded-[2.25rem] p-6 md:p-8 lg:p-9"
+          {...cardEnter}
         >
           <div className="absolute inset-x-0 top-0 h-48 bg-[radial-gradient(circle_at_top_right,rgba(15,124,134,0.18),transparent_55%),radial-gradient(circle_at_left,rgba(196,97,42,0.14),transparent_45%)]" />
           <div className="relative space-y-6">
-            <div className="max-w-3xl">
-              <p className="text-[0.72rem] uppercase tracking-[0.32em] text-[color:var(--muted)]">
-                Calculator results
-              </p>
-              <h2 className="mt-3 max-w-3xl font-display text-4xl leading-[0.98] text-[color:var(--foreground)] md:text-[3.7rem]">
-                See the care gap, the vision risk, and the modeled shift.
-              </h2>
-              <p className="mt-4 max-w-3xl text-sm leading-7 text-[color:var(--muted)]">
-                Start with the short-read cards, then open only the pieces that need explanation.
-              </p>
+            <div className="flex flex-wrap items-start justify-between gap-5">
+              <div className="max-w-3xl">
+                <p className="text-[0.72rem] uppercase tracking-[0.32em] text-[color:var(--muted)]">
+                  Calculator results
+                </p>
+                <h2 className="mt-3 max-w-3xl font-display text-[3rem] leading-[0.96] text-[color:var(--foreground)] md:text-[3.55rem]">
+                  See the care gap, the vision risk, and the modeled shift.
+                </h2>
+                <p className="mt-3 max-w-[38rem] text-sm leading-7 text-[color:var(--muted)]">
+                  Read the headlines first. Hover or open only the layers that need explanation.
+                </p>
+              </div>
+              <div className="rounded-full border border-[color:var(--line)] bg-white/75 px-4 py-2 text-sm text-[color:var(--foreground)]">
+                Confidence <span className="font-medium">{result.confidenceLabel}</span>
+              </div>
             </div>
 
             <div className="grid gap-4 xl:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]">
-              <div className="grid gap-4 sm:grid-cols-2">
+              <motion.div
+                className="grid gap-4 sm:grid-cols-2"
+                initial={reducedMotion ? false : { opacity: 0, y: 12 }}
+                whileInView={reducedMotion ? undefined : { opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ duration: 0.45, ease: easeOutExpo, delay: 0.04 }}
+              >
                 <InsightChip
                   icon={TrendingUp}
                   label="Indicative diabetes-rate reduction"
@@ -474,16 +499,23 @@ export function SimulatorClient({
                     : "The model does not generate enough baseline blindness-risk volume to show a stable reduction share in this scenario."}
                   detail="This is the most tangible long-run vision-protection signal in the model. It estimates how many cases that might otherwise progress into blindness or profound permanent loss of sight are plausibly diverted by earlier screening and follow-up."
                 />
-              </div>
+              </motion.div>
 
-              <BlindnessReductionSpotlight
-                baselineBlindness={baselineBlindness}
-                interventionBlindness={interventionBlindness}
-                blindnessAvoided={result.blindnessAvoided.base}
-                blindnessReductionShare={blindnessReductionShare}
-                severeConsequencesAvoided={result.severeConsequencesAvoided.base}
-                confidenceLabel={result.confidenceLabel}
-              />
+              <motion.div
+                initial={reducedMotion ? false : { opacity: 0, x: 18 }}
+                whileInView={reducedMotion ? undefined : { opacity: 1, x: 0 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ duration: 0.5, ease: easeOutExpo, delay: 0.08 }}
+              >
+                <BlindnessReductionSpotlight
+                  baselineBlindness={baselineBlindness}
+                  interventionBlindness={interventionBlindness}
+                  blindnessAvoided={result.blindnessAvoided.base}
+                  blindnessReductionShare={blindnessReductionShare}
+                  severeConsequencesAvoided={result.severeConsequencesAvoided.base}
+                  confidenceLabel={result.confidenceLabel}
+                />
+              </motion.div>
             </div>
 
             <PathwaySummaryPanel
@@ -491,19 +523,23 @@ export function SimulatorClient({
               pathway={result.pathway}
             />
           </div>
-        </section>
+        </motion.section>
 
-        <section className="surface-card rounded-[2.2rem] p-6 md:p-8">
-          <div className="grid gap-6 xl:grid-cols-[minmax(0,0.7fr)_minmax(0,1.3fr)] xl:items-end">
+        <motion.section
+          className="surface-card rounded-[2.25rem] p-6 md:p-8 lg:p-9"
+          {...cardEnter}
+          transition={{ duration: 0.48, ease: easeOutExpo, delay: 0.05 }}
+        >
+          <div className="grid gap-6 xl:grid-cols-[minmax(0,0.72fr)_minmax(0,1.28fr)] xl:items-end">
             <div className="min-w-0">
               <p className="text-[0.72rem] uppercase tracking-[0.32em] text-[color:var(--muted)]">
                 Before and after compare
               </p>
-              <h2 className="mt-3 max-w-2xl font-display text-4xl leading-[0.98] text-[color:var(--foreground)] md:text-[3.2rem]">
-                Give the baseline and the modeled future their own stage.
+              <h2 className="mt-3 max-w-2xl font-display text-[2.9rem] leading-[0.98] text-[color:var(--foreground)] md:text-[3.2rem]">
+                Give the baseline and the modeled future their own clear stage.
               </h2>
               <p className="mt-4 max-w-2xl text-sm leading-7 text-[color:var(--muted)]">
-                Read today first, then slide into the modeled after-state.
+                Start with today, then drag into the modeled after-state to see what actually shifts.
               </p>
             </div>
 
@@ -537,9 +573,9 @@ export function SimulatorClient({
             revealPercent={revealPercent}
             onRevealChange={setRevealPercent}
           />
-        </section>
+        </motion.section>
 
-        <section className="surface-card rounded-[2rem] p-6 md:p-8">
+        <motion.section className="surface-card rounded-[2rem] p-6 md:p-8" {...cardEnter}>
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <p className="text-[0.72rem] uppercase tracking-[0.32em] text-[color:var(--muted)]">
@@ -598,35 +634,38 @@ export function SimulatorClient({
               </motion.div>
             )}
           </AnimatePresence>
-        </section>
+        </motion.section>
 
-        <section className="grid gap-4 xl:grid-cols-3">
-          {comparisonResults.map(({ scenario: comparisonScenario, result: comparisonResult }) => (
-            <ComparisonPackageCard
-              key={`${comparisonScenario.deviceMode}-${comparisonScenario.clinicInstalls}`}
-              scenario={comparisonScenario}
-              result={comparisonResult}
-            />
-          ))}
-        </section>
+        <ExpandableSection
+          eyebrow="Comparison packages"
+          title="Keep the alternate packages one click away."
+          summary="Open the comparison set when you want to scan lean, balanced, and accelerated rollout shapes side by side."
+          tone="paper"
+        >
+          <div className="grid gap-4 xl:grid-cols-3">
+            {comparisonResults.map(({ scenario: comparisonScenario, result: comparisonResult }) => (
+              <ComparisonPackageCard
+                key={`${comparisonScenario.deviceMode}-${comparisonScenario.clinicInstalls}`}
+                scenario={comparisonScenario}
+                result={comparisonResult}
+              />
+            ))}
+          </div>
+        </ExpandableSection>
 
-        <section className="surface-card rounded-[2rem] p-6">
+        <ExpandableSection
+          eyebrow="Assumptions in force"
+          title={activeAssumptionSet.name}
+          summary={activeAssumptionSet.description}
+          tone="navy"
+        >
           <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
             <div>
-              <p className="text-[0.72rem] uppercase tracking-[0.32em] text-[color:var(--muted)]">
-                Assumptions in force
-              </p>
-              <h2 className="mt-2 font-display text-3xl text-[color:var(--foreground)]">
-                {activeAssumptionSet.name}
-              </h2>
-              <p className="mt-3 max-w-2xl text-sm leading-7 text-[color:var(--muted)]">
-                {activeAssumptionSet.description}
-              </p>
-              <ul className="mt-5 space-y-3 text-sm leading-7 text-[color:var(--foreground)]">
+              <ul className="space-y-3 text-sm leading-7 text-white/78">
                 {result.explanation.map((item) => (
                   <li
                     key={item}
-                    className="rounded-2xl border border-[color:var(--line)] bg-white/70 px-4 py-3"
+                    className="rounded-2xl border border-white/10 bg-white/6 px-4 py-3"
                   >
                     {item}
                   </li>
@@ -635,7 +674,7 @@ export function SimulatorClient({
             </div>
 
             <div className="space-y-3">
-              <p className="text-[0.72rem] uppercase tracking-[0.32em] text-[color:var(--muted)]">
+              <p className="text-[0.72rem] uppercase tracking-[0.32em] text-white/55">
                 Evidence anchors
               </p>
               {[...healthEvidenceNotes, ...economicEvidenceNotes]
@@ -646,22 +685,22 @@ export function SimulatorClient({
                     href={note.url}
                     target="_blank"
                     rel="noreferrer"
-                    className="block rounded-[1.4rem] border border-[color:var(--line)] bg-white/70 p-4 transition-transform hover:-translate-y-0.5"
+                    className="block rounded-[1.4rem] border border-white/10 bg-white/6 p-4 transition-transform hover:-translate-y-0.5"
                   >
                     <div className="flex items-center justify-between gap-4">
-                      <p className="font-medium text-[color:var(--foreground)]">{note.name}</p>
-                      <span className="rounded-full bg-[color:rgba(15,124,134,0.12)] px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-[color:var(--teal)]">
+                      <p className="font-medium text-white">{note.name}</p>
+                      <span className="rounded-full bg-[color:rgba(15,124,134,0.18)] px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-[#9be6e2]">
                         {note.evidenceTier}
                       </span>
                     </div>
-                    <p className="mt-2 text-sm leading-6 text-[color:var(--muted)]">
+                    <p className="mt-2 text-sm leading-6 text-white/65">
                       {note.summary}
                     </p>
                   </a>
                 ))}
             </div>
           </div>
-        </section>
+        </ExpandableSection>
       </div>
     </div>
   );
@@ -678,6 +717,7 @@ function ImpactCompareSlider({
   revealPercent: number;
   onRevealChange: (value: number) => void;
 }) {
+  const reducedMotion = useReducedMotion();
   const baselineScreeningRate = diabeticAdults > 0
     ? (result.baselineSnapshot.screenedPatients / diabeticAdults) * 100
     : 0;
@@ -730,10 +770,10 @@ function ImpactCompareSlider({
   return (
     <article
       data-testid="compare-view"
-      className="relative mt-6 min-w-0 self-start overflow-hidden rounded-[2rem] border border-[color:var(--line)] bg-[color:rgba(255,255,255,0.92)] backdrop-blur-xl"
+      className="shadow-soft relative mt-6 min-w-0 self-start overflow-hidden rounded-[2.15rem] border border-[color:var(--line)] bg-[color:rgba(255,255,255,0.94)] backdrop-blur-xl"
     >
-      <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(196,97,42,0.16),rgba(244,240,234,0.8)_45%,rgba(15,124,134,0.12))]" />
-      <div className="relative min-h-[36rem] md:min-h-[40rem]">
+      <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(196,97,42,0.12),rgba(244,240,234,0.82)_45%,rgba(15,124,134,0.12))]" />
+      <div className="relative min-h-[38rem] md:min-h-[42rem]">
         <div
           className="absolute inset-0"
           style={{ clipPath: `inset(0 ${100 - revealPercent}% 0 0)` }}
@@ -766,16 +806,20 @@ function ImpactCompareSlider({
           className="absolute inset-y-4 z-20 w-px bg-white/95 shadow-[0_0_0_1px_rgba(16,34,53,0.08)]"
           style={{ left: `calc(${dividerPercent}% - 1px)` }}
         >
-          <div className="absolute left-1/2 top-1/2 flex h-14 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-white/35 bg-[color:#102235] text-white shadow-xl">
+          <motion.div
+            className="absolute left-1/2 top-1/2 flex h-15 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-white/35 bg-[color:#102235] text-white shadow-xl"
+            animate={reducedMotion ? undefined : { scale: [1, 1.035, 1] }}
+            transition={reducedMotion ? undefined : { duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+          >
             <ArrowLeftRight className="h-5 w-5" />
-          </div>
+          </motion.div>
         </div>
       </div>
 
-      <div className="relative z-20 border-t border-[color:var(--line)] bg-[color:#faf7f0]/90 px-5 py-4">
+      <div className="relative z-20 border-t border-[color:var(--line)] bg-[color:#faf7f0]/92 px-5 py-5">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2 text-[11px] uppercase tracking-[0.22em] text-[color:var(--muted)]">
           <span>Current baseline</span>
-          <span>Side-scroll to reveal the modeled investment effect</span>
+          <span>Drag the divider to compare the modeled investment effect</span>
           <span>After investment</span>
         </div>
         <input
@@ -820,7 +864,7 @@ function CompareScene({
 
   return (
     <div
-      className={`absolute inset-0 p-6 ${
+      className={`absolute inset-0 p-6 md:p-7 ${
         isAfter
           ? "bg-[linear-gradient(180deg,rgba(16,34,53,0.96),rgba(16,34,53,0.9))] text-white"
           : "text-[color:var(--foreground)]"
@@ -839,9 +883,9 @@ function CompareScene({
           >
             {subtitle}
           </p>
-          <h3 className="mt-2 font-display text-[2.4rem] leading-[0.96]">{title}</h3>
+          <h3 className="mt-2 font-display text-[2.2rem] leading-[0.96] md:text-[2.55rem]">{title}</h3>
         </div>
-        <div className={`flex flex-wrap gap-2 ${isAfter ? "justify-end" : ""}`}>
+        <div className={`grid gap-2 sm:grid-cols-3 ${isAfter ? "w-full sm:w-auto" : "w-full sm:w-auto"}`}>
           <div
             className={`rounded-full border px-4 py-2 text-sm ${
               isAfter
@@ -872,7 +916,7 @@ function CompareScene({
         </div>
       </div>
 
-      <div className={`mt-6 space-y-4 ${isAfter ? "ml-auto max-w-[92%]" : "max-w-[94%]"}`}>
+      <div className={`mt-7 space-y-4 ${isAfter ? "ml-auto max-w-[92%]" : "max-w-[94%]"}`}>
         {rows.map((row) => {
           const value = isAfter ? row.after : row.baseline;
           const maxValue = Math.max(row.baseline, row.after, 1);
@@ -910,15 +954,15 @@ function HealthEffectsPanel({
 }) {
   return (
     <div className="grid gap-4 2xl:grid-cols-[1.08fr_0.92fr]">
-      <article className="rounded-[1.8rem] border border-[color:var(--line)] bg-white/85 p-5">
+      <article className="rounded-[1.9rem] border border-[color:var(--line)] bg-white/88 p-5 md:p-6">
         <p className="text-[0.72rem] uppercase tracking-[0.28em] text-[color:var(--muted)]">
           Public-health view
         </p>
-        <h3 className="mt-2 font-display text-3xl text-[color:var(--foreground)]">
+        <h3 className="mt-2 font-display text-[2.35rem] text-[color:var(--foreground)]">
           Read the care-pathway shift in four steps.
         </h3>
         <p className="mt-3 max-w-2xl text-sm leading-7 text-[color:var(--muted)]">
-          Missed today. Screened after deployment. Follow-up completed. Severe harm avoided.
+          Missed today, screened after deployment, follow-up completed, severe harm avoided.
         </p>
         {coverageSaturated ? (
           <div className="mt-4 rounded-[1.2rem] border border-[color:rgba(15,124,134,0.16)] bg-[color:rgba(15,124,134,0.08)] px-4 py-3 text-sm leading-6 text-[color:var(--foreground)]">
@@ -975,11 +1019,11 @@ function HealthEffectsPanel({
         </div>
       </article>
 
-      <article className="rounded-[1.8rem] border border-[color:rgba(16,34,53,0.08)] bg-[linear-gradient(180deg,#102235,#17314a)] p-5 text-white">
+      <article className="rounded-[1.9rem] border border-[color:rgba(16,34,53,0.08)] bg-[linear-gradient(180deg,#102235,#17314a)] p-5 md:p-6 text-white">
         <p className="text-[0.72rem] uppercase tracking-[0.28em] text-white/55">
           Downstream health effects
         </p>
-        <h3 className="mt-2 font-display text-3xl">What the model says gets prevented later.</h3>
+        <h3 className="mt-2 font-display text-[2.35rem]">What the model says gets prevented later.</h3>
 
         <div className="mt-5 space-y-3">
           <HealthOutcomeRow
@@ -1018,7 +1062,7 @@ function HealthEffectsPanel({
 
         <div className="mt-5 rounded-[1.4rem] border border-white/10 bg-white/6 p-4">
           <p className="text-sm font-medium text-white">Why this is the most useful public-health lens</p>
-          <ul className="mt-3 space-y-2 text-sm leading-7 text-white/72">
+          <ul className="mt-3 space-y-2 text-sm leading-6 text-white/72">
             <li>It puts the currently missed population on the screen instead of hiding them behind ROI math.</li>
             <li>It shows the screening pathway as a patient story: seen, followed up, protected from late harm.</li>
             <li>It frames blindness and surgery as downstream consequences of delayed detection, not isolated events.</li>
@@ -1088,11 +1132,11 @@ function EconomicPanel({
 
   return (
     <div className="grid gap-4 2xl:grid-cols-[1.05fr_0.95fr]">
-      <article className="min-w-0 rounded-[1.8rem] border border-[color:var(--line)] bg-white/85 p-5">
+      <article className="min-w-0 rounded-[1.9rem] border border-[color:var(--line)] bg-white/88 p-5 md:p-6">
         <p className="text-[0.72rem] uppercase tracking-[0.28em] text-[color:var(--muted)]">
           Government view
         </p>
-        <h3 className="mt-2 font-display text-3xl text-[color:var(--foreground)]">
+        <h3 className="mt-2 font-display text-[2.35rem] text-[color:var(--foreground)]">
           Make the public value legible for budget and policy decisions.
         </h3>
         <p className="mt-3 max-w-2xl text-sm leading-7 text-[color:var(--muted)]">
@@ -1181,11 +1225,11 @@ function EconomicPanel({
         </div>
       </article>
 
-      <article className="min-w-0 rounded-[1.8rem] border border-[color:rgba(16,34,53,0.08)] bg-[linear-gradient(180deg,#102235,#17314a)] p-5 text-white">
+      <article className="min-w-0 rounded-[1.9rem] border border-[color:rgba(16,34,53,0.08)] bg-[linear-gradient(180deg,#102235,#17314a)] p-5 md:p-6 text-white">
         <p className="text-[0.72rem] uppercase tracking-[0.28em] text-white/55">
           Population-value metrics
         </p>
-        <h3 className="mt-2 font-display text-3xl">Show what the cash line does not capture.</h3>
+        <h3 className="mt-2 font-display text-[2.35rem]">Show what the cash line does not capture.</h3>
 
         <div className="mt-5 grid gap-3 sm:grid-cols-2 2xl:grid-cols-1">
           <OutcomeCard
@@ -1270,8 +1314,10 @@ function ComparisonPackageCard({
         : "navy";
 
   return (
-    <article
+    <motion.article
       className={`surface-card rounded-[1.8rem] border p-5 ${toneClasses[accentTone].shell}`}
+      whileHover={{ y: -4 }}
+      transition={{ type: "spring", stiffness: 260, damping: 24 }}
     >
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
@@ -1308,7 +1354,7 @@ function ComparisonPackageCard({
           value={formatSignedCurrency(result.projectedThreeYearNetValue.base)}
         />
       </div>
-    </article>
+    </motion.article>
   );
 }
 
@@ -1339,7 +1385,11 @@ function BlindnessReductionSpotlight({
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <article className="group relative overflow-hidden rounded-[1.8rem] border border-[color:rgba(16,34,53,0.1)] bg-[linear-gradient(180deg,#102235,#17314a)] p-5 text-white">
+    <motion.article
+      className="group relative overflow-hidden rounded-[1.8rem] border border-[color:rgba(16,34,53,0.1)] bg-[linear-gradient(180deg,#102235,#17314a)] p-5 text-white"
+      whileHover={{ y: -4 }}
+      transition={{ type: "spring", stiffness: 260, damping: 24 }}
+    >
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <p className="text-[0.72rem] uppercase tracking-[0.28em] text-white/55">
@@ -1424,7 +1474,7 @@ function BlindnessReductionSpotlight({
           </motion.div>
         ) : null}
       </AnimatePresence>
-    </article>
+    </motion.article>
   );
 }
 
@@ -1440,13 +1490,17 @@ function CompareHighlightStat({
   tone: Tone;
 }) {
   return (
-    <div className={`group relative rounded-[1.35rem] border p-4 ${toneClasses[tone].shell}`}>
+    <motion.div
+      className={`group relative rounded-[1.35rem] border p-4 ${toneClasses[tone].shell}`}
+      whileHover={{ y: -3 }}
+      transition={{ type: "spring", stiffness: 260, damping: 24 }}
+    >
       <p className="text-[11px] uppercase tracking-[0.2em] text-[color:var(--muted)]">{label}</p>
       <p className="mt-3 font-display text-3xl text-[color:var(--foreground)]">{value}</p>
       <div className="pointer-events-none absolute inset-x-4 bottom-4 hidden rounded-[1rem] border border-[color:var(--line)] bg-white/92 p-3 text-xs leading-5 text-[color:var(--foreground)] opacity-0 transition duration-200 md:block md:translate-y-2 md:group-hover:translate-y-0 md:group-hover:opacity-100">
         {note}
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -1468,7 +1522,11 @@ function InsightChip({
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <div className={`group relative rounded-[1.4rem] border p-4 ${toneClasses[tone].shell}`}>
+    <motion.div
+      className={`group relative rounded-[1.4rem] border p-4 ${toneClasses[tone].shell}`}
+      whileHover={{ y: -3 }}
+      transition={{ type: "spring", stiffness: 260, damping: 24 }}
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className={`rounded-full p-2 ${toneClasses[tone].pill}`}>
@@ -1503,7 +1561,7 @@ function InsightChip({
           </motion.div>
         ) : null}
       </AnimatePresence>
-    </div>
+    </motion.div>
   );
 }
 
@@ -1568,9 +1626,94 @@ function PathwaySummaryPanel({
   );
 }
 
+function ExpandableSection({
+  eyebrow,
+  title,
+  summary,
+  tone,
+  children,
+}: {
+  eyebrow: string;
+  title: string;
+  summary: string;
+  tone: "paper" | "navy";
+  children: ReactNode;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const dark = tone === "navy";
+
+  return (
+    <section
+      className={`rounded-[2rem] border p-6 md:p-7 ${
+        dark
+          ? "border-[color:rgba(16,34,53,0.08)] bg-[linear-gradient(180deg,#102235,#17314a)] text-white"
+          : "surface-card"
+      }`}
+    >
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="max-w-3xl">
+          <p
+            className={`text-[0.72rem] uppercase tracking-[0.32em] ${
+              dark ? "text-white/55" : "text-[color:var(--muted)]"
+            }`}
+          >
+            {eyebrow}
+          </p>
+          <h2
+            className={`mt-2 font-display text-[2.35rem] ${
+              dark ? "text-white" : "text-[color:var(--foreground)]"
+            }`}
+          >
+            {title}
+          </h2>
+          <p
+            className={`mt-3 max-w-2xl text-sm leading-7 ${
+              dark ? "text-white/68" : "text-[color:var(--muted)]"
+            }`}
+          >
+            {summary}
+          </p>
+        </div>
+        <CardInfoButton
+          dark={dark}
+          open={expanded}
+          onClick={() => setExpanded((current) => !current)}
+          label={title}
+        />
+      </div>
+
+      <AnimatePresence initial={false}>
+        {expanded ? (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.18 }}
+            className="mt-5"
+          >
+            {children}
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+    </section>
+  );
+}
+
+function SidebarSectionHeading({ children }: { children: string }) {
+  return (
+    <div className="flex items-center gap-3 pt-1">
+      <div className="h-px flex-1 bg-[color:rgba(16,34,53,0.08)]" />
+      <p className="text-[0.68rem] uppercase tracking-[0.28em] text-[color:var(--muted)]">
+        {children}
+      </p>
+      <div className="h-px flex-1 bg-[color:rgba(16,34,53,0.08)]" />
+    </div>
+  );
+}
+
 function BaselineMiniStat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-[1.15rem] border border-[color:var(--line)] bg-white/82 px-3 py-3">
+    <div className="rounded-[1.2rem] border border-[color:var(--line)] bg-white/84 px-3 py-3">
       <p className="text-[10px] uppercase tracking-[0.18em] text-[color:var(--muted)]">{label}</p>
       <p className="mt-2 font-display text-[1.7rem] leading-none text-[color:var(--foreground)]">{value}</p>
     </div>
@@ -1983,7 +2126,7 @@ function TabButton({
   onClick,
 }: {
   active: boolean;
-  children: React.ReactNode;
+  children: ReactNode;
   onClick: () => void;
 }) {
   return (
