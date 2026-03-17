@@ -1,0 +1,102 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f5f1e9;
+  --foreground: #102235;
+  --muted: #5d6a73;
+  --accent: #c4612a;
+  --teal: #0f7c86;
+  --line: rgba(16, 34, 53, 0.08);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-public-sans);
+  --font-display: var(--font-newsreader);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top right, rgba(15, 124, 134, 0.08), transparent 24%),
+    radial-gradient(circle at left 8% bottom 12%, rgba(196, 97, 42, 0.08), transparent 22%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.38), rgba(255, 255, 255, 0)),
+    var(--background);
+  color: var(--foreground);
+  font-family: var(--font-public-sans), sans-serif;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at top center, rgba(255, 255, 255, 0.55), transparent 46%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.16), transparent 28%);
+  opacity: 0.8;
+}
+
+a {
+  text-decoration: none;
+}
+
+::selection {
+  background: rgba(196, 97, 42, 0.9);
+  color: white;
+}
+
+.font-display {
+  font-family: var(--font-newsreader), serif;
+}
+
+.surface-card {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid var(--line);
+  backdrop-filter: blur(5px);
+  box-shadow: 0 14px 40px rgba(11, 33, 50, 0.05);
+}
+
+.field-shell {
+  width: 100%;
+  border-radius: 1rem;
+  border: 1px solid var(--line);
+  background: white;
+  padding: 0.85rem 1rem;
+  color: var(--foreground);
+  outline: none;
+}
+
+.field-shell:focus {
+  border-color: rgba(15, 124, 134, 0.5);
+  box-shadow: 0 0 0 4px rgba(15, 124, 134, 0.12);
+}
+
+.quiet-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(16, 34, 53, 0.28) transparent;
+}
+
+.quiet-scrollbar::-webkit-scrollbar {
+  width: 12px;
+}
+
+.quiet-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.quiet-scrollbar::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: rgba(16, 34, 53, 0.28);
+  background-clip: padding-box;
+}

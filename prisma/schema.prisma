@@ -1,0 +1,50 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum AssumptionSetStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model AssumptionSet {
+  id          String              @id @default(cuid())
+  slug        String              @unique
+  name        String
+  version     String
+  description String
+  status      AssumptionSetStatus @default(DRAFT)
+  publishedAt DateTime?
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  assumptions Assumption[]
+}
+
+model Assumption {
+  id           String        @id @default(cuid())
+  setId        String
+  key          String
+  label        String
+  category     String
+  evidenceTier String
+  unit         String
+  low          Float
+  base         Float
+  high         Float
+  min          Float
+  max          Float
+  note         String
+  sourceNoteIds String
+  sortOrder    Int
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  set          AssumptionSet @relation(fields: [setId], references: [id], onDelete: Cascade)
+
+  @@unique([setId, key])
+}
